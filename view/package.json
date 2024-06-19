@@ -4,5 +4,11 @@
   "main": "index.js",
   "repository": "https://github.com/oyodai-games/ENEGIN.git",
   "author": "voidzeroN <tokumeikibou.re0@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+
+  "scripts": {
+    "start": "tsc-watch --onSuccess \"node src/app/index.js\""
+  }
+
+
 }
