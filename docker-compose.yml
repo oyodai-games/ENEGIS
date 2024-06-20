@@ -1,0 +1,17 @@
+version: "3" 
+services:
+  view:
+    container_name: "view" 
+    build:
+      context: ./view
+      dockerfile: view.Dockerfile 
+    volumes:
+    - ./view:/view
+    - ./view/node_modules:/view/node_modules
+    command: /view/script/dev_up.sh
+    ports:
+    - "3000:3000"
+    stdin_open: true
+    tty: true 
+    env_file:
+      - ./view.env
