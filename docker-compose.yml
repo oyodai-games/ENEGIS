@@ -8,10 +8,10 @@ services:
     volumes:
     - ./view:/view
     - ./view/node_modules:/view/node_modules
-    command: sh -c "yarn && yarn start"
-    ports:    
+    command: /view/script/dev_up.sh
+    ports:
     - "3000:3000"
-    stdin_open: true 
+    stdin_open: true
     tty: true 
     env_file:
       - ./view.env
