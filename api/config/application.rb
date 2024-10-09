@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'boot'
 
 require 'rails/all'
@@ -6,7 +8,10 @@ require 'rails/all'
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+# The Api module serves as the namespace for the API-related classes.
 module Api
+  # Api::Application is the main application class for the API.
+  # It inherits from Rails::Application and handles configuration settings for the API.
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.0
