@@ -1,0 +1,30 @@
+{
+    "name": "My Project Dev Container",
+    "dockerComposeFile": "./../docker-compose.yml",
+    "service": "app",  // デフォルトではappサービスを指定
+    "workspaceFolder": "/api",
+    "settings": {
+      "terminal.integrated.shell.linux": "/bin/bash"
+    },
+    "extensions": [
+      "ms-vscode.vscode-typescript-next",
+      "ms-python.python",
+      "rebornix.Ruby"
+    ],
+    "postCreateCommand": "bundle install",  // appサービスに対するセットアップコマンド
+    "remoteEnv": {
+      "DATABASE_URL": "sqlite3:db/development.sqlite3",
+      "PORT": "3001"
+    },
+    "portsAttributes": {
+      "3000": {
+        "label": "Frontend (view)"
+      },
+      "3001": {
+        "label": "Backend (app)"
+      }
+    },
+    "shutdownAction": "stopCompose",
+    "overrideCommand": false  // 各サービスのデフォルトのコマンドを使用
+  }
+  
