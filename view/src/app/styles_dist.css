@@ -557,26 +557,3 @@ video {
 .static {
   position: static;
 }
-
-.pt-10 {
-  padding-top: 2.5rem;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.text-7xl {
-  font-size: 4.5rem;
-  line-height: 1;
-}
-
-.text-9xl {
-  font-size: 8rem;
-  line-height: 1;
-}
-
-.text-blue-500 {
-  --tw-text-opacity: 1;
-  color: rgb(59 130 246 / var(--tw-text-opacity));
-}
