@@ -1,0 +1,15 @@
+Style/FrozenStringLiteralComment:
+  Exclude:
+    - 'bin/*'
+
+Metrics/CyclomaticComplexity:
+  Exclude:
+    - 'bin/*'
+
+Metrics/MethodLength:
+  Exclude:
+    - 'bin/*'
+
+Metrics/PerceivedComplexity:
+  Exclude:
+    - 'bin/*'
