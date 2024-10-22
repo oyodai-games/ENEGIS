@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'yaml'
 require 'openai'
 
 # ユーザー入力を元に、ChatGPT APIでテキスト・画像を生成する機能を提供する。
@@ -65,5 +66,14 @@ class ChatGptApi
         ]
       }
     )
+  end
+
+  def self.create_prompts(path, user_input)
+    yaml_data = YAML.load_file(path)
+
+    {
+      'system' => yaml_data['prompt'],
+      'user' => user_input
+    }
   end
 end

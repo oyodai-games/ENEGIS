@@ -95,4 +95,22 @@ RSpec.describe ChatGptApi, type: :unit do
       expect(response).to be_nil
     end
   end
+  describe '#create_prompts' do
+    it 'プロンプトを生成できる' do
+      user_input = 'Hello!!'
+      prompts_path = './spec/fixtures/prompt_template.yml'
+      generated_prompt = {
+        'user' => 'Hello!!',
+        'system' => "テストプロンプト\n\n" \
+                    "出力形式：\n" \
+                    "{\n" \
+                    "  \"name\": \"怪物の名前\",\n" \
+                    "  \"description\": \"怪物の外見や能力についての説明\",\n" \
+                    "  \"story\": \"怪物が生まれるきっかけや背景を描く恐ろしい物語\"\n" \
+                    "}\n"
+      }
+      response = ChatGptApi.create_prompts(prompts_path, user_input)
+      expect(response).to eq(generated_prompt)
+    end
+  end
 end
