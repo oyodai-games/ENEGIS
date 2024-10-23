@@ -43,6 +43,12 @@ class ChatGptApi
     end
 
     response
+  rescue ChatGptApiError => e
+    Rails.logger.error "ChatGptApiError occurred: #{e.message}"
+    raise e
+  rescue StandardError => e
+    Rails.logger.error "Unexpected error: #{e.message}"
+    raise ChatGptApiError.new('Unexpected error occurred', 500, 1004)
   end
 
   # GPT APIを呼び出し、テキストを生成するメソッド
@@ -66,14 +72,25 @@ class ChatGptApi
         ]
       }
     )
+  rescue OpenAI::Error => e
+    Rails.logger.error "ChatGPT API call failed: #{e.message}"
+    raise ChatGptApiCallError, e.message
+  rescue Faraday::UnauthorizedError => e
+    Rails.logger.error "ChatGPT API call failed: #{e.message}"
+    raise ChatGptApiCallError, e.message
   end
 
   def self.create_prompts(path, user_input)
     yaml_data = YAML.load_file(path)
+    raise FileNotFoundError, path unless yaml_data['prompt']
 
-    {
-      'system' => yaml_data['prompt'],
-      'user' => user_input
-    }
+    { 'system' => yaml_data['prompt'], 'user' => user_input }
+  rescue Errno::ENOENT
+    raise FileNotFoundError, path
+  rescue Psych::SyntaxError => e
+    raise InvalidYamlError, e.message
+  rescue StandardError => e
+    Rails.logger.error "Unexpected error while loading YAML: #{e.message}"
+    raise ChatGptApiError.new('YAML parsing failed', 500, 1005)
   end
 end
