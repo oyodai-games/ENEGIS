@@ -27,6 +27,5 @@ services:
       - "./api/db:/api/db"  # SQLite データベースをプロジェクトの `api/db` に保存
     ports:
       - "3001:3001"
-    environment:
-      DATABASE_URL: "sqlite3:db/development.sqlite3"
-      PORT: 3001
+    env_file:
+      - ./api.env
