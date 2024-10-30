@@ -1,0 +1,70 @@
+prompt: |
+  ユーザーの入力(怪物のストーリー)とパラメーターを元にして、4種類のスキルを生成してください。
+  各スキルは1~<%= prompt_variable[:max_effects] %>個の"effects"を持ちます。
+  スキルの種類は攻撃2つ、防御1つ、回復1つです。
+  以下の怪物のストーリーとパラメーターに基づいてスキルをJSON形式で生成してください：
+
+  パラメーター：
+  {
+    "name": "<%= prompt_variable[:name] %>",
+    "description": "<%= prompt_variable[:description] %>",
+    "constitution": <%= prompt_variable[:constitution] %>,
+    "strength": <%= prompt_variable[:strength] %>,
+    "size": <%= prompt_variable[:size] %>,
+    "intelligence": <%= prompt_variable[:intelligence] %>,
+    "dexterity": <%= prompt_variable[:dexterity] %>,
+    "power": <%= prompt_variable[:power] %>,
+    "appearance": <%= prompt_variable[:appearance] %>
+  }
+
+  スキルの出力形式：
+  "cards": [
+    {
+      "name": "スキル名",
+      "effects": [
+        {
+          "effect_type": "効果の種類（int）",
+          "parameter": "参照するパラメータ（constitution または strength）",
+          "multiplier": "倍率（int）"
+        }
+      ],
+      "type": "スキルタイプ（1:攻撃, 2:防御, 3:回復）",
+      "cost": "発動コスト (int)"
+    },
+    {
+      "name": "スキル名",
+      "effects": [
+        {
+          "effect_type": "効果の種類（int）",
+          "parameter": "参照するパラメータ（constitution または strength）",
+          "multiplier": "倍率（int）"
+        }
+      ],
+      "type": "スキルタイプ（1:攻撃, 2:防御, 3:回復）",
+      "cost": "発動コスト (int)"
+    },
+    {
+      "name": "スキル名",
+      "effects": [
+        {
+          "effect_type": "効果の種類（int）",
+          "parameter": "参照するパラメータ（constitution または strength）",
+          "multiplier": "倍率（int）"
+        }
+      ],
+      "type": "スキルタイプ（1:攻撃, 2:防御, 3:回復）",
+      "cost": "発動コスト (int)"
+    },
+    {
+      "name": "スキル名",
+      "effects": [
+        {
+          "effect_type": "効果の種類（int）",
+          "parameter": "参照するパラメータ（constitution または strength）",
+          "multiplier": "倍率（int）"
+        }
+      ],
+      "type": "スキルタイプ（1:攻撃, 2:防御, 3:回復）",
+      "cost": "発動コスト (int)"
+    }
+  ]
