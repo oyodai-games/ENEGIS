@@ -43,7 +43,9 @@ RSpec.describe ChatGptApi, type: :unit do
       chat_gpt_api = ChatGptApi.new(settings_list)
 
       # 実際のAPI呼び出し
-      response = chat_gpt_api.call_chat_gpt_api(prompts)
+      async_task = chat_gpt_api.call_chat_gpt_api(prompts)
+
+      response = async_task.wait
 
       # レスポンスが正しく返っているか確認
       expect(response).not_to be_nil
