@@ -2,6 +2,7 @@
 
 require 'erb'
 require 'yaml'
+require 'async'
 require 'openai'
 
 # ユーザー入力を元に、ChatGPT APIでテキスト・画像を生成する機能を提供する。
@@ -29,21 +30,22 @@ class ChatGptApi
   # @return [Hash, nil] 生成されたテキストのハッシュ
   def generate_text(prompts, validators)
     # ChatGPT APIを呼び出す
-    response = call_chat_gpt_api(prompts)
+    async_task = call_chat_gpt_api(prompts)
 
+    response = async_task.wait
     # JSON形式をハッシュに変換
-    response = JsonUtils.json_to_hash(response['choices'][0]['message']['content'])
-    return nil if response.nil?
+    response_json = JsonUtils.json_to_hash(response['choices'][0]['message']['content'])
+    return nil if response_json.nil?
 
     # 生成されたテキスト(辞書型)を検証
     validators.each do |validator|
-      unless validator.call(response)
-        Rails.logger.error "Validation failed: #{response}"
+      unless validator.call(response_json)
+        Rails.logger.error "Validation failed: #{response_json}"
         return nil
       end
     end
 
-    response
+    response_json
   rescue ChatGptApiError => e
     Rails.logger.error "ChatGptApiError occurred: #{e.message}"
     raise e
@@ -55,30 +57,34 @@ class ChatGptApi
   # GPT APIを呼び出し、テキストを生成するメソッド
   #
   # @param prompts [Hash] プロンプト文
-  # @return [String] 生成されたテキスト
+  # @return [Async::Task] 生成されたテキスト
   def call_chat_gpt_api(prompts)
-    @client.chat(
-      parameters: {
-        model: @model,
-        temperature: @temperature,
-        top_p: @top_p,
-        n: @n,
-        stream: @stream,
-        max_tokens: @max_tokens,
-        presence_penalty: @presence_penalty,
-        frequency_penalty: @frequency_penalty,
-        messages: [
-          { role: 'system', content: prompts['system'] },
-          { role: 'user', content: prompts['user'] }
-        ]
-      }
-    )
-  rescue OpenAI::Error => e
-    Rails.logger.error "ChatGPT API call failed: #{e.message}"
-    raise ChatGptApiCallError, e.message
-  rescue Faraday::UnauthorizedError => e
-    Rails.logger.error "ChatGPT API call failed: #{e.message}"
-    raise ChatGptApiCallError, e.message
+    Async do |task|
+      begin
+        @client.chat(
+          parameters: {
+            model: @model,
+            temperature: @temperature,
+            top_p: @top_p,
+            n: @n,
+            stream: @stream,
+            max_tokens: @max_tokens,
+            presence_penalty: @presence_penalty,
+            frequency_penalty: @frequency_penalty,
+            messages: [
+              { role: 'system', content: prompts['system'] },
+              { role: 'user', content: prompts['user'] }
+            ]
+          }
+        )
+      rescue OpenAI::Error => e
+        Rails.logger.error "ChatGPT API call failed: #{e.message}"
+        raise ChatGptApiCallError, e.message
+      rescue Faraday::UnauthorizedError => e
+        Rails.logger.error "ChatGPT API call failed: #{e.message}"
+        raise ChatGptApiCallError, e.message
+      end
+    end
   end
 
   # プロンプトを生成する関数

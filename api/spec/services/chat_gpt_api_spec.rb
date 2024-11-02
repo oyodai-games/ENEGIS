@@ -55,7 +55,8 @@ RSpec.describe ChatGptApi, type: :unit do
       ClimateControl.modify OPENAI_ACCESS_TOKEN: 'invalid_token' do
         chat_gpt_api = ChatGptApi.new(settings_list)
         expect do
-          chat_gpt_api.call_chat_gpt_api(prompts)
+          async_task = chat_gpt_api.call_chat_gpt_api(prompts)
+          result = async_task.wait
         end.to raise_error(ChatGptApiCallError, /Failed to call ChatGPT API/)
       end
     end
@@ -75,7 +76,9 @@ RSpec.describe ChatGptApi, type: :unit do
         ]
       }
 
-      allow(chat_gpt_api).to receive(:call_chat_gpt_api).and_return(api_response)
+      allow(chat_gpt_api).to receive(:call_chat_gpt_api).and_return(
+        Async { api_response }
+      )
 
       parsed_json = { 'setup' => 'Why did the chicken cross the road?', 'punchline' => 'To get to the other side!' }
 
@@ -98,7 +101,9 @@ RSpec.describe ChatGptApi, type: :unit do
         ]
       }
 
-      allow(chat_gpt_api).to receive(:call_chat_gpt_api).and_return(api_response)
+      allow(chat_gpt_api).to receive(:call_chat_gpt_api).and_return(
+        Async { api_response }
+      )
 
       validator = ->(output) { output['setup'] == 'wrong setup' }
 
