@@ -59,17 +59,15 @@ RSpec.describe ChatGptApi, type: :unit do
 
         # $stderr を一時的にリダイレクトして警告メッセージを抑制
         original_stderr = $stderr
-        $stderr = File.open(File::NULL, "w")
+        $stderr = File.open(File::NULL, 'w')
 
         expect do
           async_task = chat_gpt_api.call_chat_gpt_api(prompts)
-          result = async_task.wait
+          async_task.wait
         end.to raise_error(ChatGptApiCallError, /Failed to call ChatGPT API/)
-
       ensure
         # $stderr を元に戻す
         $stderr = original_stderr
-
       end
     end
   end
@@ -147,7 +145,7 @@ RSpec.describe ChatGptApi, type: :unit do
                     "  \"name\": \"怪物の名前\",\n" \
                     "  \"description\": \"怪物の外見や能力についての説明\",\n" \
                     "  \"story\": \"怪物が生まれるきっかけや背景を描く恐ろしい物語\"\n" \
-                    "}"
+                    '}'
       }
       response = ChatGptApi.create_prompts(prompts_path, user_input)
       expect(response).to eq(generated_prompt)
