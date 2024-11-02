@@ -54,10 +54,20 @@ RSpec.describe ChatGptApi, type: :unit do
       # 一時的に環境変数を不正なトークンに変更
       ClimateControl.modify OPENAI_ACCESS_TOKEN: 'invalid_token' do
         chat_gpt_api = ChatGptApi.new(settings_list)
+
+        # $stderr を一時的にリダイレクトして警告メッセージを抑制
+        original_stderr = $stderr
+        $stderr = File.open(File::NULL, "w")
+
         expect do
           async_task = chat_gpt_api.call_chat_gpt_api(prompts)
           result = async_task.wait
         end.to raise_error(ChatGptApiCallError, /Failed to call ChatGPT API/)
+
+      ensure
+        # $stderr を元に戻す
+        $stderr = original_stderr
+
       end
     end
   end
