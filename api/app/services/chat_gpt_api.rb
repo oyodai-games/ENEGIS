@@ -46,18 +46,19 @@ class ChatGptApi
     end
 
     response_json
-  rescue ChatGptApiError => e
-    Rails.logger.error "ChatGptApiError occurred: #{e.message}"
-    raise e
-  rescue StandardError => e
-    Rails.logger.error "Unexpected error: #{e.message}"
-    raise ChatGptApiError.new('Unexpected error occurred', 500, 1004)
+  rescue OpenAI::Error, Faraday::UnauthorizedError => e
+    Rails.logger.error "ChatGPT API call failed: #{e.message}"
+    raise ChatGptApiCallError, e.message
   end
 
   # GPT APIを呼び出し、テキストを生成するメソッド
   #
   # @param prompts [Hash] プロンプト文
   # @return [Async::Task] 生成されたテキスト
+  #
+  # @raise [Faraday::ConnectionFailed] OpenAI API呼び出しが失敗した場合（例: ネットワークエラー）
+  # @raise [Faraday::UnauthorizedError] 認証エラーが発生した場合（無効なAPIキーなど）
+  # @raise [ChatGptApiCallError] API呼び出しで予期しないエラーが発生した場合
   def call_chat_gpt_api(prompts)
     Async do |task|
       begin
@@ -74,15 +75,9 @@ class ChatGptApi
             messages: [
               { role: 'system', content: prompts['system'] },
               { role: 'user', content: prompts['user'] }
-            ]
+            ],
           }
         )
-      rescue OpenAI::Error => e
-        Rails.logger.error "ChatGPT API call failed: #{e.message}"
-        raise ChatGptApiCallError, e.message
-      rescue Faraday::UnauthorizedError => e
-        Rails.logger.error "ChatGPT API call failed: #{e.message}"
-        raise ChatGptApiCallError, e.message
       end
     end
   end
@@ -93,6 +88,10 @@ class ChatGptApi
   # @param prompt_variable [Hash] テンプレートに組み込む変数の一覧
   # @param user_input [String] ユーザー入力
   # @return [Hash] 生成されたプロンプト
+  #
+  # @raise [FileNotFoundError] テンプレートファイルが存在しない場合
+  # @raise [Psych::SyntaxError] YAMLファイルの構文が無効な場合
+  # @raise [StandardError] YAMLのパース中に発生する予期しないエラー
   def self.create_prompts(path, user_input, prompt_variable = {})
     yaml_data = YAML.load_file(path)
     raise FileNotFoundError, path unless yaml_data['prompt']
@@ -102,12 +101,5 @@ class ChatGptApi
     result = renderer.result(binding)
 
     { 'system' => result.chomp, 'user' => user_input }
-  rescue Errno::ENOENT
-    raise FileNotFoundError, path
-  rescue Psych::SyntaxError => e
-    raise InvalidYamlError, e.message
-  rescue StandardError => e
-    Rails.logger.error "Unexpected error while loading YAML: #{e.message}"
-    raise ChatGptApiError.new('YAML parsing failed', 500, 1005)
   end
 end

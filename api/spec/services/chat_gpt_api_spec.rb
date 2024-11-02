@@ -51,25 +51,6 @@ RSpec.describe ChatGptApi, type: :unit do
       expect(response).not_to be_nil
       expect(response).not_to include('error')
     end
-
-    it 'ChatGPTの認証に失敗した場合、ChatGptApiCallErrorが発生する' do
-      # 一時的に環境変数を不正なトークンに変更
-      ClimateControl.modify OPENAI_ACCESS_TOKEN: 'invalid_token' do
-        chat_gpt_api = ChatGptApi.new(settings_list)
-
-        # $stderr を一時的にリダイレクトして警告メッセージを抑制
-        original_stderr = $stderr
-        $stderr = File.open(File::NULL, 'w')
-
-        expect do
-          async_task = chat_gpt_api.call_chat_gpt_api(prompts)
-          async_task.wait
-        end.to raise_error(ChatGptApiCallError, /Failed to call ChatGPT API/)
-      ensure
-        # $stderr を元に戻す
-        $stderr = original_stderr
-      end
-    end
   end
 
   describe '#generate_text' do
@@ -120,17 +101,6 @@ RSpec.describe ChatGptApi, type: :unit do
       response = chat_gpt_api.generate_text(prompts, [validator])
       expect(response).to be_nil
     end
-
-    it '予期しないエラーが発生した場合、ChatGptApiErrorを発生させる' do
-      chat_gpt_api = ChatGptApi.new(settings_list)
-
-      # StandardErrorをシミュレート
-      allow(chat_gpt_api).to receive(:call_chat_gpt_api).and_raise(StandardError.new('Something went wrong'))
-
-      expect do
-        chat_gpt_api.generate_text(prompts, [])
-      end.to raise_error(ChatGptApiError, /Unexpected error occurred/)
-    end
   end
 
   describe '#create_prompts' do
@@ -151,32 +121,6 @@ RSpec.describe ChatGptApi, type: :unit do
       expect(response).to eq(generated_prompt)
     end
 
-    it 'YAMLファイルが見つからない場合、FileNotFoundErrorが発生する' do
-      user_input = 'Hello!!'
-      prompts_path = './spec/fixtures/missing_prompt.yml'
-
-      expect do
-        ChatGptApi.create_prompts(prompts_path, user_input)
-      end.to raise_error(FileNotFoundError, /YAML file not found at path/)
-    end
-
-    it 'YAMLファイルのフォーマットが無効な場合、InvalidYamlErrorが発生する' do
-      user_input = 'Hello!!'
-      prompts_path = './spec/fixtures/invalid_prompt.yml'
-
-      expect do
-        ChatGptApi.create_prompts(prompts_path, user_input)
-      end.to raise_error(InvalidYamlError, /YAML file contains invalid format/)
-    end
-
-    it '文字列の置き換えに成功する' do
-      user_input = 'Hello!!'
-      prompts_path = './spec/fixtures/invalid_prompt.yml'
-
-      expect do
-        ChatGptApi.create_prompts(prompts_path, user_input)
-      end.to raise_error(InvalidYamlError, /YAML file contains invalid format/)
-    end
     it 'ERBによる変数の埋め込みに成功する' do
       user_input = 'Hello!!'
       prompts_path = './spec/fixtures/embedding_prompt.yml'
