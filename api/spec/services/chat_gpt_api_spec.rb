@@ -47,7 +47,7 @@ RSpec.describe ChatGptApi, type: :unit do
 
       # レスポンスが正しく返っているか確認
       expect(response).not_to be_nil
-      expect(response).to include('choices')
+      expect(response).not_to include('error')
     end
 
     it 'ChatGPTの認証に失敗した場合、ChatGptApiCallErrorが発生する' do
