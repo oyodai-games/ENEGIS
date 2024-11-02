@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'erb'
 require 'yaml'
 require 'openai'
 
@@ -80,11 +81,21 @@ class ChatGptApi
     raise ChatGptApiCallError, e.message
   end
 
-  def self.create_prompts(path, user_input)
+  # プロンプトを生成する関数
+  #
+  # @param path [String] テンプレートのパス
+  # @param prompt_variable [Hash] テンプレートに組み込む変数の一覧
+  # @param user_input [String] ユーザー入力
+  # @return [Hash] 生成されたプロンプト
+  def self.create_prompts(path, user_input, prompt_variable = {})
     yaml_data = YAML.load_file(path)
     raise FileNotFoundError, path unless yaml_data['prompt']
 
-    { 'system' => yaml_data['prompt'], 'user' => user_input }
+    # ERB を使って変数を置き換え
+    renderer = ERB.new(yaml_data['prompt'])
+    result = renderer.result(binding)
+
+    { 'system' => result, 'user' => user_input }
   rescue Errno::ENOENT
     raise FileNotFoundError, path
   rescue Psych::SyntaxError => e

@@ -153,5 +153,21 @@ RSpec.describe ChatGptApi, type: :unit do
         ChatGptApi.create_prompts(prompts_path, user_input)
       end.to raise_error(InvalidYamlError, /YAML file contains invalid format/)
     end
+
+    it '文字列の置き換えに成功する' do
+      user_input = 'Hello!!'
+      prompts_path = './spec/fixtures/invalid_prompt.yml'
+
+      expect do
+        ChatGptApi.create_prompts(prompts_path, user_input)
+      end.to raise_error(InvalidYamlError, /YAML file contains invalid format/)
+    end
+    it 'ERBによる変数の埋め込みに成功する' do
+      user_input = 'Hello!!'
+      prompts_path = './spec/fixtures/embedding_prompt.yml'
+      prompt_variable = { power: '100' }
+      result = ChatGptApi.create_prompts(prompts_path, user_input, prompt_variable)
+      expect(result['system']).to eq('モンスターの力は 100 です。')
+    end
   end
 end
