@@ -130,7 +130,7 @@ RSpec.describe ChatGptApi, type: :unit do
                     "  \"name\": \"怪物の名前\",\n" \
                     "  \"description\": \"怪物の外見や能力についての説明\",\n" \
                     "  \"story\": \"怪物が生まれるきっかけや背景を描く恐ろしい物語\"\n" \
-                    "}\n"
+                    "}"
       }
       response = ChatGptApi.create_prompts(prompts_path, user_input)
       expect(response).to eq(generated_prompt)

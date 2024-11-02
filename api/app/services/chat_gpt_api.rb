@@ -95,7 +95,7 @@ class ChatGptApi
     renderer = ERB.new(yaml_data['prompt'])
     result = renderer.result(binding)
 
-    { 'system' => result, 'user' => user_input }
+    { 'system' => result.chomp, 'user' => user_input }
   rescue Errno::ENOENT
     raise FileNotFoundError, path
   rescue Psych::SyntaxError => e
