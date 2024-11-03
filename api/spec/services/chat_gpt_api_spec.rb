@@ -105,6 +105,25 @@ RSpec.describe ChatGptApi, type: :unit do
         chat_gpt_api.generate_text(prompts, [validator])
       end.to raise_error(InvalidChatGptResponseError, /Invalid response format. Generated text and prompts logged./)
     end
+
+    it 'ネットワーク接続に規定回数失敗した場合、設定された遅延時間が経過してからFaraday::ConnectionFailedが発生する' do
+      chat_gpt_api = ChatGptApi.new(settings_list)
+
+      allow(chat_gpt_api).to receive(:call_chat_gpt_api).and_raise(Faraday::ConnectionFailed)
+
+      # 時間計測の開始
+      Rails.logger.info(settings_list)
+      expected_delay = settings_list['time_to_access_refresh'] * (settings_list['max_failed_access'] - 1)
+      start_time = Time.now
+
+      expect do
+        chat_gpt_api.generate_text(prompts, [])
+      end.to raise_error(Faraday::ConnectionFailed)
+
+      # 実行時間が期待される遅延時間の差分が1未満であることを確認
+      difference = Time.now - start_time - expected_delay
+      expect(difference).to be < 1
+    end
   end
 
   describe '#create_prompts' do
