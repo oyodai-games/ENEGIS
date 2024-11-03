@@ -12,7 +12,9 @@ RSpec.describe ChatGptApi, type: :unit do
       'stream' => false,
       'max_tokens' => 100,
       'presence_penalty' => 0.5,
-      'frequency_penalty' => 0.5
+      'frequency_penalty' => 0.5,
+      'max_create' => 5,
+      'max_failed_access' => 3.0
     }
   end
 
@@ -78,7 +80,7 @@ RSpec.describe ChatGptApi, type: :unit do
       expect(response).to eq(parsed_json)
     end
 
-    it '検証に失敗した場合、nilを返す' do
+    it '検証に失敗した場合、InvalidChatGptResponseErrorが発生する' do
       chat_gpt_api = ChatGptApi.new(settings_list)
 
       api_response = {
@@ -97,8 +99,9 @@ RSpec.describe ChatGptApi, type: :unit do
 
       validator = ->(output) { output['setup'] == 'wrong setup' }
 
-      response = chat_gpt_api.generate_text(prompts, [validator])
-      expect(response).to be_nil
+      expect do
+        chat_gpt_api.generate_text(prompts, [validator])
+      end.to raise_error(InvalidChatGptResponseError, /Invalid response format. Generated text and prompts logged./)
     end
   end
 

@@ -38,4 +38,10 @@ class ApplicationController < ActionController::API
     Rails.logger.error("Unexpected error: #{error.message}\n#{error.backtrace.join("\n")}")
     render json: { error: 'An unexpected error occurred. Please try again later.' }, status: :internal_server_error
   end
+
+  # ChatGPTから期待するフォーマットでの出力が得られなかった場合のエラーハンドリング
+  rescue_from InvalidChatGptResponseError do |error|
+    Rails.logger.error("Invalid ChatGPT response format: #{error.message}")
+    render json: { error: error.message }, status: :unprocessable_entity
+  end
 end

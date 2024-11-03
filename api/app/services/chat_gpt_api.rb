@@ -19,6 +19,8 @@ class ChatGptApi
     @max_tokens = settings_list['max_tokens']
     @presence_penalty = settings_list['presence_penalty']
     @frequency_penalty = settings_list['frequency_penalty']
+    @max_create = settings_list['max_create']
+    @max_failed_access = settings_list['max_failed_access']
 
     @client = OpenAI::Client.new(access_token: ENV['OPENAI_ACCESS_TOKEN'])
   end
@@ -29,26 +31,39 @@ class ChatGptApi
   # @param validators [Array<Object>] 出力を検証するための関数リスト
   # @return [Hash, nil] 生成されたテキストのハッシュ
   def generate_text(prompts, validators)
-    # ChatGPT APIを呼び出す
-    async_task = call_chat_gpt_api(prompts)
+    generate_count = 0
+    count_failed_access = 0
 
-    response = async_task.wait
-    # JSON形式をハッシュに変換
-    response_json = JsonUtils.json_to_hash(response['choices'][0]['message']['content'])
-    return nil if response_json.nil?
+    loop do
+      # ChatGPT APIを呼び出す
+      async_task = call_chat_gpt_api(prompts)
+      generate_count += 1
+      response = async_task.wait
 
-    # 生成されたテキスト(辞書型)を検証
-    validators.each do |validator|
-      unless validator.call(response_json)
-        Rails.logger.error "Validation failed: #{response_json}"
-        return nil
-      end
+      # JSON形式をハッシュに変換
+      response_json = JSON.parse(response['choices'][0]['message']['content'])
+
+      # 検証に成功した場合、returnする
+      return response_json if validates(validators, response_json)
+
+      # 生成回数が上限に達した場合に終了
+      check_generate_count(generate_count, response_json, prompts)
+    rescue Faraday::ConnectionFailed => e
+      # アクセスに失敗した回数が上限に達した場合に終了
+      Rails.logger.error "Authorization failed, retrying after #{@time_to_access_refresh} seconds: #{e.message}"
+      count_failed_access += 1
+      raise e unless count_failed_access < @max_failed_access
+
+      # 非同期で指定秒数待機した後、loopの先頭からやり直す
+      Async do |task|
+        task.sleep(@time_to_access_refresh)
+      end.wait
+      retry
+    rescue JSON::ParserError => e
+      # 生成回数が上限に達した場合に終了
+      check_generate_count(generate_count, response_json, prompts)
+      retry
     end
-
-    response_json
-  rescue OpenAI::Error, Faraday::UnauthorizedError => e
-    Rails.logger.error "ChatGPT API call failed: #{e.message}"
-    raise ChatGptApiCallError, e.message
   end
 
   # GPT APIを呼び出し、テキストを生成するメソッド
@@ -58,27 +73,24 @@ class ChatGptApi
   #
   # @raise [Faraday::ConnectionFailed] OpenAI API呼び出しが失敗した場合（例: ネットワークエラー）
   # @raise [Faraday::UnauthorizedError] 認証エラーが発生した場合（無効なAPIキーなど）
-  # @raise [ChatGptApiCallError] API呼び出しで予期しないエラーが発生した場合
   def call_chat_gpt_api(prompts)
-    Async do |task|
-      begin
-        @client.chat(
-          parameters: {
-            model: @model,
-            temperature: @temperature,
-            top_p: @top_p,
-            n: @n,
-            stream: @stream,
-            max_tokens: @max_tokens,
-            presence_penalty: @presence_penalty,
-            frequency_penalty: @frequency_penalty,
-            messages: [
-              { role: 'system', content: prompts['system'] },
-              { role: 'user', content: prompts['user'] }
-            ],
-          }
-        )
-      end
+    Async do |_task|
+      @client.chat(
+        parameters: {
+          model: @model,
+          temperature: @temperature,
+          top_p: @top_p,
+          n: @n,
+          stream: @stream,
+          max_tokens: @max_tokens,
+          presence_penalty: @presence_penalty,
+          frequency_penalty: @frequency_penalty,
+          messages: [
+            { role: 'system', content: prompts['system'] },
+            { role: 'user', content: prompts['user'] }
+          ]
+        }
+      )
     end
   end
 
@@ -91,7 +103,6 @@ class ChatGptApi
   #
   # @raise [FileNotFoundError] テンプレートファイルが存在しない場合
   # @raise [Psych::SyntaxError] YAMLファイルの構文が無効な場合
-  # @raise [StandardError] YAMLのパース中に発生する予期しないエラー
   def self.create_prompts(path, user_input, prompt_variable = {})
     yaml_data = YAML.load_file(path)
     raise FileNotFoundError, path unless yaml_data['prompt']
@@ -101,5 +112,40 @@ class ChatGptApi
     result = renderer.result(binding)
 
     { 'system' => result.chomp, 'user' => user_input }
+  end
+
+  # テキスト生成結果の検証を行う関数
+  #
+  # @param validators [Array<Object>] 検証関数リスト
+  # @param response_json [String] ChatGPT APIのレスポンス
+  # @return [Boolean] 検証結果
+  def validates(validators, response_json)
+    validators.all? do |validator|
+      if validator.call(response_json)
+        true
+      else
+        Rails.logger.error "Validation failed: #{response_json}"
+        break false
+      end
+    end
+  end
+
+  # 生成回数がチェックする関数
+  #
+  # @param generate_count [Integer] 生成回数
+  # @param response_json [String] ChatGPT APIのレスポンス
+  # @param prompts [Hash] プロンプト文
+  # @return [nil]
+  #
+  # @raise [InvalidChatGptResponseError] ChatGPTでの生成回数が上限に達した場合
+  def check_generate_count(generate_count, response_json, prompts)
+    # 生成回数が上限に達した場合に終了
+    return unless generate_count >= @max_create
+
+    Rails.logger.error(
+      "Invalid ChatGPT response format. Generated text: #{JSON.pretty_generate(response_json)}, " \
+      "Prompts: #{JSON.pretty_generate(prompts)}"
+    )
+    raise InvalidChatGptResponseError, 'Invalid response format. Generated text and prompts logged.'
   end
 end
