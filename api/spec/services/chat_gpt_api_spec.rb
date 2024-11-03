@@ -14,7 +14,7 @@ RSpec.describe ChatGptApi, type: :unit do
       'presence_penalty' => 0.5,
       'frequency_penalty' => 0.5,
       'max_create' => 5,
-      'max_failed_access' => 3.0,
+      'max_failed_access' => 3,
       'time_to_access_refresh' => 3
     }
   end
