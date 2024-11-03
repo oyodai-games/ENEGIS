@@ -21,6 +21,7 @@ class ChatGptApi
     @frequency_penalty = settings_list['frequency_penalty']
     @max_create = settings_list['max_create']
     @max_failed_access = settings_list['max_failed_access']
+    @time_to_access_refresh = settings_list['time_to_access_refresh']
 
     @client = OpenAI::Client.new(access_token: ENV['OPENAI_ACCESS_TOKEN'])
   end
