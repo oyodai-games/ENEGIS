@@ -1,0 +1,2 @@
+prompt: |
+  モンスターの力は <%= prompt_variable[:power] %> です。
