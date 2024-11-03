@@ -1,0 +1,16 @@
+default: &default
+  temperature: 1
+  top_p: 0.9
+  n: 1
+  stream: false
+  max_tokens: 500
+  presence_penalty: 0.0
+  frequency_penalty: 0.1
+
+development:
+  <<: *default
+  model: "gpt-4"
+
+test:
+  <<: *default
+  model: "gpt-3.5-turbo"
