@@ -21,12 +21,6 @@ class ApplicationController < ActionController::API
     render json: { error: 'Unauthorized access. Please check your API credentials.' }, status: :internal_server_error
   end
 
-  # OpenAI API呼び出しで予期しないエラーが発生した場合
-  rescue_from ChatGptApiCallError do |error|
-    Rails.logger.error("Unexpected ChatGPT API call error: #{error.message}\n#{error.backtrace.join("\n")}")
-    render json: { error: 'Unexpected error occurred while calling ChatGPT API.' }, status: :internal_server_error
-  end
-
   # テンプレートファイルが存在しない場合
   rescue_from FileNotFoundError do |error|
     Rails.logger.error("File not found: #{error.message}\n#{error.backtrace.join("\n")}")

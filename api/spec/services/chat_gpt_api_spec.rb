@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-require 'chat_gpt_api_error'
 
 RSpec.describe ChatGptApi, type: :unit do
   let(:settings_list) do
