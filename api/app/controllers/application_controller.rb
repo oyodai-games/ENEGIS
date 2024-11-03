@@ -33,7 +33,7 @@ class ApplicationController < ActionController::API
     render json: { error: 'Invalid YAML file syntax.' }, status: :internal_server_error
   end
 
-  # YAMLのパース中に発生する予期しないエラー
+  # 予期しないエラー
   rescue_from StandardError do |error|
     Rails.logger.error("Unexpected error: #{error.message}\n#{error.backtrace.join("\n")}")
     render json: { error: 'An unexpected error occurred. Please try again later.' }, status: :internal_server_error
