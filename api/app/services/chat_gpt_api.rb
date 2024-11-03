@@ -41,13 +41,13 @@ class ChatGptApi
       response = async_task.wait
 
       # JSON形式をハッシュに変換
-      response_json = JSON.parse(response['choices'][0]['message']['content'])
+      response_hash = JSON.parse(response['choices'][0]['message']['content'])
 
       # 検証に成功した場合、returnする
-      return response_json if validates(validators, response_json)
+      return response_hash if validates(validators, response_hash)
 
       # 生成回数が上限に達した場合に終了
-      check_generate_count(generate_count, response_json, prompts)
+      check_generate_count(generate_count, response_hash, prompts)
     rescue Faraday::ConnectionFailed => e
       # アクセスに失敗した回数が上限に達した場合に終了
       Rails.logger.error "Authorization failed, retrying after #{@time_to_access_refresh} seconds: #{e.message}"
@@ -61,7 +61,7 @@ class ChatGptApi
       retry
     rescue JSON::ParserError => e
       # 生成回数が上限に達した場合に終了
-      check_generate_count(generate_count, response_json, prompts)
+      check_generate_count(generate_count, response_hash, prompts)
       retry
     end
   end
@@ -117,14 +117,14 @@ class ChatGptApi
   # テキスト生成結果の検証を行う関数
   #
   # @param validators [Array<Object>] 検証関数リスト
-  # @param response_json [String] ChatGPT APIのレスポンス
+  # @param response_hash [Hash] ChatGPT APIのレスポンス
   # @return [Boolean] 検証結果
-  def validates(validators, response_json)
+  def validates(validators, response_hash)
     validators.all? do |validator|
-      if validator.call(response_json)
+      if validator.call(response_hash)
         true
       else
-        Rails.logger.error "Validation failed: #{response_json}"
+        Rails.logger.error "Validation failed: #{response_hash}"
         break false
       end
     end
@@ -133,17 +133,17 @@ class ChatGptApi
   # 生成回数がチェックする関数
   #
   # @param generate_count [Integer] 生成回数
-  # @param response_json [String] ChatGPT APIのレスポンス
+  # @param response_hash [Hash] ChatGPT APIのレスポンス
   # @param prompts [Hash] プロンプト文
   # @return [nil]
   #
   # @raise [InvalidChatGptResponseError] ChatGPTでの生成回数が上限に達した場合
-  def check_generate_count(generate_count, response_json, prompts)
+  def check_generate_count(generate_count, response_hash, prompts)
     # 生成回数が上限に達した場合に終了
     return unless generate_count >= @max_create
 
     Rails.logger.error(
-      "Invalid ChatGPT response format. Generated text: #{JSON.pretty_generate(response_json)}, " \
+      "Invalid ChatGPT response format. Generated text: #{JSON.pretty_generate(response_hash)}, " \
       "Prompts: #{JSON.pretty_generate(prompts)}"
     )
     raise InvalidChatGptResponseError, 'Invalid response format. Generated text and prompts logged.'
