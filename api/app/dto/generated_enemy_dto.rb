@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # カードを含むEnemyのデータを保存するクラス
-class GeneratedEnemyDTO
+class GeneratedEnemyDto
   attr_accessor :name, :description, :story, :strength, :constitution, :power, :dexterity, :appearance, :intelligence,
                 :size, :cards
 
