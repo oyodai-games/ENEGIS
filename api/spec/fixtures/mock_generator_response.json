@@ -1,0 +1,83 @@
+{
+  "name": "堕天の使者",
+  "description": "堕天の使者は、白い羽を持つがその先端は黒く焼け焦げ、顔には無数の瞳が刻まれている。常に泣き叫ぶかのような響きが周囲に漂い、彼の姿を見る者は心を蝕まれ、次第に自らの意思を失う。彼は心優しい者の希望を喰らい、その跡には暗闇と絶望だけが残る。",
+  "story": "昔々、心優しい悪魔がいました。彼は天使に憧れ、天国の光に手を伸ばしました。毎日、白い雲を見上げ、心の中で天使たちの優しさと美しさに思いを馳せていました。ある日、悪魔は願いを叶える力を持つ奇妙な泉を見つけます。その水を飲めば、天使のような翼を得られると言われていました。無垢な気持ちで泉の水を飲むと、彼の背に白い羽が生え始めました。しかし、その瞬間、羽の先端が黒く変わり、彼の身体には無数の瞳が現れます。悪魔は歓喜に満ちたはずの夢が悪夢に変わったことに気づかぬまま、天使の名を口にするたび、心優しい者たちの希望を吸い取ってしまう存在へと変わり果てました。彼は永遠に天を目指し、地に堕ち続けるのです。",
+  "strength": 8,
+  "constitution": 12,
+  "power": 15,
+  "dexterity": 9,
+  "appearance": 16,
+  "intelligence": 14,
+  "size": 11,
+  "cards": [
+      {
+        "name": "絶望の眼差し",
+        "effects": [
+          {
+            "effect_type": 1,
+            "parameter": "strength",
+            "multiplier": 3
+          },
+          {
+            "effect_type": 2,
+            "parameter": "constitution",
+            "multiplier": 2
+          }
+        ],
+        "type": 1,
+        "cost": 5
+      },
+      {
+        "name": "魂喰らいの一撃",
+        "effects": [
+          {
+            "effect_type": 3,
+            "parameter": "strength",
+            "multiplier": 4
+          },
+          {
+            "effect_type": 1,
+            "parameter": "power",
+            "multiplier": 2
+          }
+        ],
+        "type": 1,
+        "cost": 6
+      },
+      {
+        "name": "暗黒の守護",
+        "effects": [
+          {
+            "effect_type": 4,
+            "parameter": "constitution",
+            "multiplier": 3
+          },
+          {
+            "effect_type": 5,
+            "parameter": "size",
+            "multiplier": 2
+          }
+        ],
+        "type": 2,
+        "cost": 4
+      },
+      {
+        "name": "絶望の癒し",
+        "effects": [
+          {
+            "effect_type": 6,
+            "parameter": "constitution",
+            "multiplier": 3
+          },
+          {
+            "effect_type": 7,
+            "parameter": "intelligence",
+            "multiplier": 2
+          }
+        ],
+        "type": 3,
+        "cost": 4
+      }
+    ]
+  
+}
