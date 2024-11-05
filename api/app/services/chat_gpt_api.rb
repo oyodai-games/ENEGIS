@@ -105,11 +105,9 @@ class ChatGptApi
   # @raise [FileNotFoundError] テンプレートファイルが存在しない場合
   # @raise [Psych::SyntaxError] YAMLファイルの構文が無効な場合
   def self.create_prompts(path, user_input, prompt_variable = {})
-    yaml_data = YAML.load_file(path)
-    raise FileNotFoundError, path unless yaml_data['prompt']
-
+    data = File.read(path)
     # ERB を使って変数を置き換え
-    renderer = ERB.new(yaml_data['prompt'])
+    renderer = ERB.new(data)
     result = renderer.result(binding)
 
     { 'system' => result.chomp, 'user' => user_input }
