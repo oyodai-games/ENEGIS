@@ -24,9 +24,9 @@ RSpec.describe Generator, type: :unit do
     it '正しく初期化される' do
       generator = Generator.new(settings_list)
       expect(generator.instance_variable_get(:@generator)).to be_a(ChatGptApi)
-      expect(generator.instance_variable_get(:@story_prompt_path)).to eq('')
-      expect(generator.instance_variable_get(:@parameters_prompt_path)).to eq('')
-      expect(generator.instance_variable_get(:@cards_prompt_path)).to eq('')
+      expect(generator.instance_variable_get(:@story_prompt_path).to_s).to eq('/api')
+      expect(generator.instance_variable_get(:@parameters_prompt_path).to_s).to eq('/api')
+      expect(generator.instance_variable_get(:@cards_prompt_path).to_s).to eq('/api')
     end
   end
 

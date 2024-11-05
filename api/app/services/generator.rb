@@ -11,9 +11,9 @@ class Generator
   # @param settings_list [Hash] モデルの設定
   def initialize(settings_list)
     @generator = ChatGptApi.new(settings_list)
-    @story_prompt_path = settings_list['story_prompt_path']
-    @parameters_prompt_path = settings_list['parameters_prompt_path']
-    @cards_prompt_path = settings_list['cards_prompt_path']
+    @story_prompt_path = Rails.root.join(settings_list['story_prompt_path'])
+    @parameters_prompt_path = Rails.root.join(settings_list['parameters_prompt_path'])
+    @cards_prompt_path = Rails.root.join(settings_list['cards_prompt_path'])
   end
 
   # ストーリーを生成するメソッド

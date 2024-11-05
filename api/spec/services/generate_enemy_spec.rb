@@ -65,9 +65,9 @@ RSpec.describe GenerateEnemy, type: :unit do
   describe '#initialize' do
     it '正しく初期化される' do
       expect(generate_enemy.instance_variable_get(:@generator)).to be_a(ChatGptApi)
-      expect(generate_enemy.instance_variable_get(:@story_prompt_path)).to eq('')
-      expect(generate_enemy.instance_variable_get(:@parameters_prompt_path)).to eq('')
-      expect(generate_enemy.instance_variable_get(:@cards_prompt_path)).to eq('')
+      expect(generate_enemy.instance_variable_get(:@story_prompt_path).to_s).to eq('/api')
+      expect(generate_enemy.instance_variable_get(:@parameters_prompt_path).to_s).to eq('/api')
+      expect(generate_enemy.instance_variable_get(:@cards_prompt_path).to_s).to eq('/api')
       expect(generate_enemy.instance_variable_get(:@story_validators)).not_to be_nil
       expect(generate_enemy.instance_variable_get(:@parameter_validators)).not_to be_nil
       expect(generate_enemy.instance_variable_get(:@card_validators)).not_to be_nil
