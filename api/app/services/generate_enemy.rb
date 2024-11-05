@@ -25,11 +25,11 @@ class GenerateEnemy < Generator
     story = generate_story_task.wait
 
     # プロンプトを元に夢のステータスを作成
-    generate_parameters_task = generate_parameters(story, @parameter_validators)
+    generate_parameters_task = generate_parameters(story.to_s, @parameter_validators)
     parameters = generate_parameters_task.wait
 
     # プロンプトを元にスキルを作成
-    generate_cards_task = generate_cards(story, @card_validators, parameters)
+    generate_cards_task = generate_cards(story.to_s, @card_validators, parameters)
     cards = generate_cards_task.wait
 
     # ストーリー・ステータス・スキルを保存
