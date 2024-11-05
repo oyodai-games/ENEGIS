@@ -25,7 +25,7 @@ class Generator
   def generate_story(user_input, validators, prompt_variable = {})
     # プロンプトを元に夢のストーリーを作成
     Async do
-      story_prompts = @generator.create_prompts(@story_prompt_path, user_input, prompt_variable)
+      story_prompts = ChatGptApi.create_prompts(@story_prompt_path, user_input, prompt_variable)
       @generator.generate_text(story_prompts, validators)
     end
   end
@@ -39,7 +39,7 @@ class Generator
   def generate_parameters(user_input, validators, prompt_variable = {})
     # プロンプトを元に夢のステータスを作成
     Async do
-      parameters_prompts = @generator.create_prompts(@parameters_prompt_path, user_input, prompt_variable)
+      parameters_prompts = ChatGptApi.create_prompts(@parameters_prompt_path, user_input, prompt_variable)
       @generator.generate_text(parameters_prompts, validators)
     end
   end
@@ -53,7 +53,7 @@ class Generator
   def generate_cards(user_input, validators, prompt_variable = {})
     # プロンプトを元に夢のカードを作成
     Async do
-      cards_prompts = @generator.create_prompts(@cards_prompt_path, user_input, prompt_variable)
+      cards_prompts = ChatGptApi.create_prompts(@cards_prompt_path, user_input, prompt_variable)
       @generator.generate_text(cards_prompts, validators)
     end
   end
