@@ -25,7 +25,6 @@ RSpec.describe GenerateEnemy, type: :unit do
     JSON.parse(file_content)
   end
 
-
   let(:story_response) do
     {
       'name' => yaml_data['name'],
