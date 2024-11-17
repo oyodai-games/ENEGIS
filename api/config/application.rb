@@ -37,5 +37,8 @@ module Api
 
     # errorsディレクトリをオートロードパスに追加
     config.autoload_paths += %W[#{config.root}/app/errors]
+
+    # dtoディレクトリをオートロードパスに追加
+    config.autoload_paths += %W[#{config.root}/app/dto]
   end
 end
