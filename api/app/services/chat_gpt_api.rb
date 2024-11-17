@@ -41,8 +41,7 @@ class ChatGptApi
       generate_count += 1
       response = async_task.wait
 
-      # JSON形式をハッシュに変換
-      response_hash = JSON.parse(response['choices'][0]['message']['content'])
+      response_hash = parse_response_to_hash(response)
 
       # 検証に成功した場合、returnする
       return response_hash if validates(validators, response_hash)
@@ -105,11 +104,9 @@ class ChatGptApi
   # @raise [FileNotFoundError] テンプレートファイルが存在しない場合
   # @raise [Psych::SyntaxError] YAMLファイルの構文が無効な場合
   def self.create_prompts(path, user_input, prompt_variable = {})
-    yaml_data = YAML.load_file(path)
-    raise FileNotFoundError, path unless yaml_data['prompt']
-
+    data = File.read(path)
     # ERB を使って変数を置き換え
-    renderer = ERB.new(yaml_data['prompt'])
+    renderer = ERB.new(data)
     result = renderer.result(binding)
 
     { 'system' => result.chomp, 'user' => user_input }
@@ -148,5 +145,20 @@ class ChatGptApi
       "Prompts: #{JSON.pretty_generate(prompts)}"
     )
     raise InvalidChatGptResponseError, 'Invalid response format. Generated text and prompts logged.'
+  end
+
+  # レスポンスをハッシュに変換する関数
+  #
+  # @param response [Hash] APIからのレスポンス
+  # @return [Hash, nil] 生成されたテキストのハッシュ
+  def parse_response_to_hash(response)
+    # 文字列の中に改行コードが含まれている場合、改行コードを削除
+    content = response['choices'][0]['message']['content'].gsub(/\r\n|\r|\n/, '')
+
+    # 末尾に"}"がない場合、"}"を追加
+    content += '}' unless content.end_with?('}')
+
+    # JSON形式をハッシュに変換
+    JSON.parse(content)
   end
 end
