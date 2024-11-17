@@ -1,0 +1,35 @@
+default: &default
+  temperature: 0.8
+  top_p: 0.9
+  n: 1
+  stream: false
+  presence_penalty: 0.7
+  frequency_penalty: 0.3
+  story_prompt_path: "config/prompts/generate_enemys_story.yml"
+  parameters_prompt_path: "config/prompts/generate_enemys_status.yml"
+  cards_prompt_path: "config/prompts/generate_card.yml"
+
+
+development:
+  <<: *default
+  model: "gpt-3.5-turbo"
+  max_tokens: 450
+  max_create: 2
+  max_failed_access: 2
+  time_to_access_refresh: 1.0
+
+test:
+  <<: *default
+  model: "gpt-3.5-turbo"
+  max_tokens: 100
+  max_create: 3
+  max_failed_access: 2
+  time_to_access_refresh: 1.0
+
+production:
+  <<: *default
+  model: "gpt-4o"
+  max_tokens: 450
+  max_create: 5
+  max_failed_access: 4
+  time_to_access_refresh: 3.0
