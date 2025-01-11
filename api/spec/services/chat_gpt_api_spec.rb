@@ -37,6 +37,8 @@ RSpec.describe ChatGptApi, type: :unit do
       expect(chat_gpt_api.instance_variable_get(:@max_tokens)).to eq(100)
       expect(chat_gpt_api.instance_variable_get(:@presence_penalty)).to eq(0.5)
       expect(chat_gpt_api.instance_variable_get(:@frequency_penalty)).to eq(0.5)
+      expect(chat_gpt_api.instance_variable_get(:@max_create)).to eq(5)
+      expect(chat_gpt_api.instance_variable_get(:@max_failed_access)).to eq(3)
       expect(chat_gpt_api.instance_variable_get(:@time_to_access_refresh)).to eq(3)
     end
   end
